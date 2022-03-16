@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Schedule Viewer{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/schedule.css") }}" type="text/css">
+<style>
+{% for class in classes %}
+    .{{ class.class_number }} {
+     background-color: {{ rand_color() }}
+    }
+{% endfor %}
+</style>
+{% endblock %}
+{% block content %}
+<div id="schedule-container">
+{% for class in classes %}
+
+{% endfor %}
+</div>
+{% endblock %}

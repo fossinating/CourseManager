@@ -1,0 +1,9 @@
+#schedule-container {
+    height: 100%;
+    width: 100%;
+
+    grid-row: 2/3;
+
+    display: grid;
+    grid-template: 1rem repeat(56, 1fr) / 1rem repeat(5, 1fr);
+}
