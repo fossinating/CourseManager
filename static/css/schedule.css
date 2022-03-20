@@ -5,5 +5,10 @@
     grid-row: 2/3;
 
     display: grid;
-    grid-template: 1rem repeat(56, 1fr) / 1rem repeat(5, 1fr);
+    /* 14 hours, times 12 slots per hour */
+    grid-template: 1rem repeat(168, 1fr) / 1rem repeat(5, 1fr);
+}
+
+.class_description {
+    visibility: collapse;
 }
