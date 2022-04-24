@@ -1,0 +1,17 @@
+<div class="class-description" class_number="{{ class_obj.class_number }}">
+    <h2>{{ class_obj.course.code }} - {{ class_obj.class_section }}</h2>
+    <h3>{{ class_obj.course.title }}</h3>
+    {% for schedule in class_obj.schedules %}
+        <h3>{{ schedule.days }} {{ human_time(schedule.time) }}</h3>
+        <h3>{{ schedule.instructors_string() }}</h3>
+        <h3>{{ schedule.location }}</h3>
+    {% endfor %}
+    <p>{{ class_obj.course.description }}</p>
+    {% for attr in class_obj.course.attrs %}
+        <h4>{{ attr.label }}: {{ attr.value }}</h4>
+    {% endfor %}
+    <h5>{{ class_obj.hours }} hours</h5>
+    <h5>{{ class_obj.enrollment_total }} / {{ class_obj.enrollment_cap }} seats filled</h5>
+    <h5>Class Nbr: {{ class_obj.class_number }}</h5>
+    <div class="remove-class-button button" onclick="remove_class('{{ class_obj.class_number }}')">Remove</div>
+</div>

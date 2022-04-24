@@ -1,0 +1,5 @@
+<div class="class_slot" class_number="{{ class_obj.class_number }}" onclick="class_details({{ class_obj.class_number }})" style="grid-column: {{ timeslot["day"] }} / {{ timeslot["day"] + 1 }}; grid-row: {{ timeslot["start_time"] }} / {{ timeslot["end_time"] }}">
+    <h1>{{ class_obj.course.code }} - {{ class_obj.class_section }}</h1>
+    <h2>{{ human_time(timeslot["schedule"].time) }}</h2>
+    <h2>{{ timeslot["schedule"].location }}</h2>
+</div>

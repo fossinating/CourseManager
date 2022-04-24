@@ -8,8 +8,15 @@
     <meta charset="UTF-8">
 </head>
 <body>
+<div id="navbar">
+    <a class="nav_item" href="{{ url_for('schedule_viewer') }}">Schedule</a>
+    <a class="nav_item" href="{{ url_for('search') }}">Search</a>
+</div>
 {% block content %}
 
 {% endblock %}
 </body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% block script %}
+{% endblock %}
 </html>

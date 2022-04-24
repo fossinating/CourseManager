@@ -1,14 +1,134 @@
+* {
+    box-sizing: border-box;
+}
+
+#main-container {
+    display: flex;
+    overflow: hidden;
+}
+
 #schedule-container {
-    height: 100%;
+    height: 150%;
     width: 100%;
 
     grid-row: 2/3;
+    grid-column: 1/2;
 
     display: grid;
     /* 14 hours, times 12 slots per hour */
-    grid-template: 1rem repeat(168, 1fr) / 1rem repeat(5, 1fr);
+    grid-template: 2rem repeat(168, 1fr) / 3rem repeat(5, 1fr);
 }
 
-.class_description {
+.hour-indicator {
+    width: 1rem;
+    height: 0;
+    margin: 0 0 0 10px;
+}
+
+.day-indicator {
+    text-align: center;
+}
+
+.visible {
+    visibility: visible !important;
+}
+
+.class_slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    overflow-wrap: break-word;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.class_slot:hover {
+    cursor: pointer;
+    box-shadow: 0 0 0 2px grey;
+}
+
+.class_slot h1 {
+    font-size: 1.3rem;
+    line-height: 1.3rem;
+    margin: 0.1rem;
+}
+
+.class_slot h2 {
+    font-size: 1.1rem;
+    line-height: 1.1rem;
+    margin: 0.1rem;
+    font-weight: normal;
+}
+
+#class-descriptions {
+    display: flex;
+    width: 0;
     visibility: collapse;
+    transition: width 0.3s linear;
+    flex-shrink: 0;
+}
+
+#class-descriptions.visible {
+    width: 30%;
+}
+
+.class-description {
+    visibility: collapse;
+    width: 30vw;
+    height: 100%;
+    background-color: grey;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.remove-class-button {
+    background-color: darkred;
+    font-size: 2rem;
+    padding: 0.8rem;
+    border-radius: 15px;
+    text-transform: capitalize;
+}
+
+.class-description h2 {
+  font-size: 2.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.class-description h3 {
+  margin: 2px;
+}
+
+.class-description h4:first-of-type{
+    margin-top: auto;
+}
+
+.class-description h4 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.class-description h5 {
+    margin: 0.5rem;
+}
+
+
+/* Inline #3 | http://127.0.0.1:5000/ */
+
+.close-description-button {
+    position: fixed;
+    margin: 5px;
+    padding: 5px;
+    font-size: 1.4rem;
+    text-transform: capitalize;
+    font-family: sans-serif;
+    font-weight: bold;
 }

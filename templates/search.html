@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Course Search{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/search.css") }}" type="text/css">
+{% endblock %}
+{% block content %}
+<div id="content-container">
+    <div id="search-container">
+        <form id="search-form" autocomplete="off" action="/class_search">
+            <label for="class_code">Class Code</label>
+            <input id="class_code" name="class_code" class="onUpdate" type="text">
+            <label for="component"></label>
+            <select id="component" name="component" class="onUpdate">
+                <option value="any">Any</option>
+                <option value="lecture">Lecture</option>
+                <option value="recitation">Recitation</option>
+                <option value="lab">Lab</option>
+                <option value="correspondence">Correspondence</option>
+                <option value="clinical">Clinical</option>
+                <option value="practicum">Practicum</option>
+                <option value="thesis research">Thesis Research</option>
+                <option value="independent study">Independent Study</option>
+                <option value="inter_institutional">Inter_Institutional</option>
+                <option value="field work">Field Work</option>
+            </select>
+            <input type="reset">
+        </form>
+    </div>
+    <div id="results-container" class="tiled">
+        <!-- Contents here will be generated on search -->
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{{ url_for("static", filename="js/schedule_manager.js") }}"></script>
+<script src="{{ url_for("static", filename="js/search.js") }}"></script>
+{% endblock %}

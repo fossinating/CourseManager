@@ -2,35 +2,27 @@
 {% block title %}Schedule Viewer{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for("static", filename="css/schedule.css") }}" type="text/css">
-<style>
-{% for class in classes %}
-    .class_slot[class_number="{{ class.class_number }}"] {
-     background-color: {{ rand_color() }}
-    }
-{% endfor %}
-</style>
 {% endblock %}
 {% block content %}
+<div id="main-container">
 <div id="schedule-container">
-{% for class in classes %}
-{% for timeslot in class.get_timeslots() %}
-<div class="class_slot" class_number="{{ class.class_number }}" style="grid-column: {{ timeslot["day"] }} / {{ timeslot["day"] + 1 }}; grid-row: {{ timeslot["start_time"] }} / {{ timeslot["end_time"] }}">
-    <h1>{{ class.course.code }}</h1>
-    <h2>{{ class.course.hours }}</h2>
-    <h2>{{ class.room }}</h2>
+{% for hour in range(14) %}
+    <h2 class="hour-indicator" style="grid-row: {{ hour * 12 + 2 }}/{{ hour * 12 + 3 }}">{{ hour + 8 }}</h2>
+{% endfor %}
+<h2 class="day-indicator" style="grid-column: 2/3">Monday</h2>
+<h2 class="day-indicator" style="grid-column: 3/4">Tuesday</h2>
+<h2 class="day-indicator" style="grid-column: 4/5">Wednesday</h2>
+<h2 class="day-indicator" style="grid-column: 5/6">Thursday</h2>
+<h2 class="day-indicator" style="grid-column: 6/7">Friday</h2>
+<!-- Filled by requests-->
 </div>
-{% endfor %}
-{% endfor %}
 <div id="class-descriptions">
-{% for class in classes %}
-<div class="class_description" class_number="{{ class.class_number }}">
-    {{ class.course.code }} - {{ class.class_section }}
-    {{ class.course.description }}
-    {{ class.course.attrs }}
-    {{ class.class_number }}
-    {{ class.available_seats }} / {{ class.total_seats }}
-</div>
-{% endfor %}
+<div class="close-description-button button" onclick="close_class_details()">x</div>
+<!-- Filled by requests -->
 </div>
 </div>
+{% endblock %}
+{% block script %}
+<script src="{{ url_for("static", filename="js/schedule_manager.js") }}"></script>
+<script src="{{ url_for("static", filename="js/schedule.js") }}"></script>
 {% endblock %}

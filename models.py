@@ -13,17 +13,6 @@ class Instructor(db.Model):
     name = db.Column(db.Text)
 
 
-class Schedule(db.Model):
-    __tablename__ = "schedule"
-    id = db.Column(db.Integer, primary_key=True)
-    location = db.Column(db.Text)
-    instructors = db.relationship("Instructor", secondary=schedule_instructor_join_table)
-    days = db.Column(db.String(10))
-    time = db.Column(db.String(15))
-    class_id = db.Column(db.Integer, db.ForeignKey("class.class_number"))
-    class_reference = db.relationship("Class", back_populates="schedules")
-
-
 class Class(db.Model):
     __tablename__ = "class"
     course_id = db.Column(db.String(10), db.ForeignKey("course.code"))
@@ -33,7 +22,7 @@ class Class(db.Model):
     title = db.Column(db.Text)
     component = db.Column(db.Text)
     topics = db.Column(db.Text)
-    term = db.Column(db.String(15))
+    term = db.Column(db.Integer, primary_key=True)
     hours = db.Column(db.Float)
     meeting_dates = db.Column(db.String(15))
     instruction_type = db.Column(db.String)
@@ -54,42 +43,62 @@ class Class(db.Model):
             time_parts = time_string.strip().split(":")
             hours = int(time_parts[0])
             minutes = int(time_parts[1].split(" ")[0])
-            if "PM" in time_string:
-                hours += 12
             return (hours - 8) * int(60/5) + int(minutes/5) + 2
 
         for schedule in self.schedules:
-            days = schedule.schedule.split(" ")[0]
-            times = schedule.schedule[schedule.schedule.index(" ")::].split("-")
-            start_time = convert_time(times[0])
-            end_time = convert_time(times[1])
+            scheduled_days = []
+            days = ["M", "Tu", "W", "Th", "F"]
+            for i in range(len(days)):
+                if days[i] in schedule.days:
+                    scheduled_days.append(i + 2)
+            times = schedule.time.split("-")
+            start_time = 140
+            end_time = 146
+            if len(times) == 2:
+                start_time = convert_time(times[0])
+                end_time = convert_time(times[1])
 
-            def get_day(days):
-                day_names = ("TH", "M", "T", "W", "F")
-                day_num = (4, 1, 2, 3, 5)
-                for i in range(len(day_names)):
-                    if days.startswith(day_names[i]):
-                        return days.replace(day_names[i], ""), day_num[i]
-
-            while len(days) > 0:
-                result = get_day(days)
-                days = result[0]
+            for day in scheduled_days:
                 timeslots.append({
-                    "day": result[1] + 1,
+                    "day": day,
                     "start_time": start_time,
-                    "end_time": end_time
+                    "end_time": end_time,
+                    "schedule": schedule
                 })
 
         return timeslots
 
 
+class Schedule(db.Model):
+    __tablename__ = "schedule"
+    id = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.Text)
+    instructors = db.relationship("Instructor", secondary=schedule_instructor_join_table)
+    days = db.Column(db.String(10))
+    time = db.Column(db.String(15))
+    class_id = db.Column(db.Integer)
+    term = db.Column(db.Integer)
+    __table_args__ = (db.ForeignKeyConstraint([class_id, term], [Class.class_number, Class.term]),
+                      {})
+    class_reference = db.relationship("Class", back_populates="schedules", foreign_keys=[class_id, term])
+
+    def instructors_string(self):
+        return "; ".join([instructor.name for instructor in self.instructors])
+
+
+class CourseAttribute(db.Model):
+    __tablename__ = "course_attributes"
+    id = db.Column(db.Integer, primary_key=True)
+    label = db.Column(db.Text)
+    value = db.Column(db.Text)
+    parent_course_code = db.Column(db.String(10), db.ForeignKey("course.code"))
+
+
 class Course(db.Model):
     __tablename__ = "course"
     code = db.Column(db.String(10), primary_key=True)
-    catalog_number = db.Column(db.Integer)
     title = db.Column(db.Text)
-    hours = db.Column(db.String(10))
+    credits = db.Column(db.String(10))
     description = db.Column(db.Text)
-    honorsdescription = db.Column(db.Text)
-    attrs = db.Column(db.Text)
-    srcdb = db.Column(db.String(5))
+    attrs = db.relationship("CourseAttribute")
+    last_updated = db.Column(db.DateTime)
