@@ -56,6 +56,8 @@ def get_active_schedule(request, response):
         return schedule
 
 
+# TODO: accounts system to save schedules, watched classes, etc
+# TODO: share schedule with friends to get a colored overlay
 @app.route('/', methods=["GET"])
 def schedule_viewer():
     response = Response()
@@ -78,6 +80,11 @@ def search():
 
 
 @app.route('/class_search', methods=["POST"])
+# TODO: reroute to /api/search
+# TODO: Search by name, professor, geneds
+# TODO: Make add button more responsive
+# TODO: Fade if class already in schedule
+# TODO: Fade if class conflicts with schedule
 def class_search():
     q = db.session.query(Class)
     if request.form.get("class_code") != "":
@@ -88,6 +95,7 @@ def class_search():
     return render_template("search-results.html", classes=q.order_by(Class.course_id, Class.class_section).all())
 
 
+# TODO: handle colliding classes better
 @app.route('/api/schedule', methods=["POST", "OPTIONS"])
 def schedule_maker():
     response_data = []

@@ -154,6 +154,7 @@ def get_sections_data(term):
                 enrollment_total=-1*safe_cast(class_data["available seats"], int, -1)
             ))
         else:
+            class_obj.meeting_dates = class_data["meeting dates"]
             class_obj.enrollment_total = (0 if class_obj.enrollment_cap is None else class_obj.enrollment_cap)\
                                          - safe_cast(class_data["available seats"], int, -1)
 
