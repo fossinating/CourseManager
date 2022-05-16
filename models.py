@@ -79,7 +79,7 @@ class Schedule(db.Model):
     time = db.Column(db.String(15))
     class_id = db.Column(db.Integer)
     term = db.Column(db.Integer)
-    __table_args__ = (db.ForeignKeyConstraint([class_id, term], [Class.class_number, Class.term]),
+    __table_args__ = (db.ForeignKeyConstraint((class_id, term), [Class.class_number, Class.term]),
                       {})
     class_reference = db.relationship("Class", back_populates="schedules", foreign_keys=[class_id, term])
 

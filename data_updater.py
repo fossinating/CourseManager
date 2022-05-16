@@ -30,16 +30,25 @@ def safe_cast(val, to_type, default=None):
 
 
 subjects = (
-"AERO", "AAAD", "AMST", "ANTH", "APPL", "ARAB", "ARCH", "ARMY", "ARTH", "ASIA", "ASTR", "BIOC", "BCB", "BBSP", "BIOL",
-"BMME", "BIOS", "BCS", "BUSI", "CHIP", "CBIO", "CBPH", "CBMC", "CHEM", "CHER", "CHIN", "PLAN", "CLAR", "CLAS", "CLSC",
-"CRMH", "COMM", "CMPL", "COMP", "EURO", "CZCH", "DENG", "DHYG", "DHED", "DRAM", "DTCH", "ECON", "EDUC", "ENDO", "ENGL",
-"ENEC", "ENVR", "EPID", "EXSS", "EDMX", "DPET", "FOLK", "FREN", "GNET", "GEOL", "GEOG", "GERM", "GSLL", "GLBL", "GOVT",
-"GRAD", "GREK", "HBEH", "HPM", "HEBR", "HNUR", "HIST", "INLS", "IDST", "ITAL", "JAPN", "JWST", "SWAH", "KOR", "LTAM",
-"LATN", "LFIT", "LGLA", "LING", "MASC", "MTSC", "MHCH", "MATH", "MEJO", "MCRO", "MUSC", "NAVS", "NBIO", "NSCI", "NURS",
-"NUTR", "OCSC", "OCCT", "OPER", "ORPA", "ORAD", "ORTH", "PATH", "PWAD", "PEDO", "PERI", "PRSN", "PHRS", "DPMP", "PHCO",
-"PHCY", "DPOP", "PHIL", "PHYA", "PHYS", "PHYI", "PLSH", "POLI", "PORT", "PACE", "PROS", "PSYC", "PUBA", "PUBH", "PLCY",
-"RADI", "RECR", "RELI", "ROML", "RUSS", "SPHG", "SLAV", "SOWO", "SOCI", "SPAN", "SPHS", "STOR", "ARTS", "TOXC", "TURK",
-"WOLO", "WGST", "VIET")
+    "AERO", "AAAD", "AMST", "ANTH", "APPL", "ARAB", "ARCH", "ARMY", "ARTH", "ASIA", "ASTR", "BIOC", "BCB", "BBSP",
+    "BIOL",
+    "BMME", "BIOS", "BCS", "BUSI", "CHIP", "CBIO", "CBPH", "CBMC", "CHEM", "CHER", "CHIN", "PLAN", "CLAR", "CLAS",
+    "CLSC",
+    "CRMH", "COMM", "CMPL", "COMP", "EURO", "CZCH", "DENG", "DHYG", "DHED", "DRAM", "DTCH", "ECON", "EDUC", "ENDO",
+    "ENGL",
+    "ENEC", "ENVR", "EPID", "EXSS", "EDMX", "DPET", "FOLK", "FREN", "GNET", "GEOL", "GEOG", "GERM", "GSLL", "GLBL",
+    "GOVT",
+    "GRAD", "GREK", "HBEH", "HPM", "HEBR", "HNUR", "HIST", "INLS", "IDST", "ITAL", "JAPN", "JWST", "SWAH", "KOR",
+    "LTAM",
+    "LATN", "LFIT", "LGLA", "LING", "MASC", "MTSC", "MHCH", "MATH", "MEJO", "MCRO", "MUSC", "NAVS", "NBIO", "NSCI",
+    "NURS",
+    "NUTR", "OCSC", "OCCT", "OPER", "ORPA", "ORAD", "ORTH", "PATH", "PWAD", "PEDO", "PERI", "PRSN", "PHRS", "DPMP",
+    "PHCO",
+    "PHCY", "DPOP", "PHIL", "PHYA", "PHYS", "PHYI", "PLSH", "POLI", "PORT", "PACE", "PROS", "PSYC", "PUBA", "PUBH",
+    "PLCY",
+    "RADI", "RECR", "RELI", "ROML", "RUSS", "SPHG", "SLAV", "SOWO", "SOCI", "SPAN", "SPHS", "STOR", "ARTS", "TOXC",
+    "TURK",
+    "WOLO", "WGST", "VIET")
 
 
 def get_unc_course_data():
@@ -100,11 +109,21 @@ def get_unc_course_data():
                     ))
 
 
-def get_sections_data(term):
+def get_sections_data(terms):
+    for term in terms:
+        get_sections_data_for_term(term)
+
+
+# gets information about classes from the class search
+# (will not get information about any class without credit hours)
+def get_sections_data_for_term(term):
     response = requests.get("https://reports.unc.edu/class-search/advanced_search/", params={
         "term": term,
         "advanced": ", ".join(subjects)
     })
+
+    missing_courses = []
+    missing_classes = []
 
     print("got a response")
     soup = BeautifulSoup(str(response.content).replace("\\n", ""), "html.parser")
@@ -124,7 +143,7 @@ def get_sections_data(term):
         # check to see if the course exists, if not leave a warning
         course_id = static_class_data["subject"] + " " + static_class_data["catalog number"]
         if db.session.query(Course.code).filter_by(code=course_id).first() is None:
-            print(f"The course {course_id} does not already exist!")
+            missing_courses.append(course_id)
             db.session.add(Course(
                 code=course_id,
                 title=class_data["course description"],
@@ -136,10 +155,12 @@ def get_sections_data(term):
 
         class_obj = db.session.query(Class).filter_by(class_number=class_number, term=term).first()
         if class_obj is None:
+            missing_classes.append(str(class_number))
 
             db.session.add(Schedule(
                 location=class_data["room"],
-                class_id=class_number
+                class_id=class_number,
+                term=term
             ))
 
             db.session.add(Class(
@@ -151,26 +172,28 @@ def get_sections_data(term):
                 hours=safe_cast(class_data["credit hours"], float, -1.0),
                 meeting_dates=class_data["meeting dates"],
                 instruction_type=class_data["instruction mode"],
-                enrollment_total=-1*safe_cast(class_data["available seats"], int, -1)
+                enrollment_total=-1 * safe_cast(class_data["available seats"], int, -1)
             ))
         else:
             class_obj.meeting_dates = class_data["meeting dates"]
-            class_obj.enrollment_total = (0 if class_obj.enrollment_cap is None else class_obj.enrollment_cap)\
-                                         - safe_cast(class_data["available seats"], int, -1)
+            class_obj.instruction_type = class_data["instruction mode"]
+            class_obj.enrollment_total = \
+                (0 if class_obj.enrollment_cap is None else class_obj.enrollment_cap) \
+                - safe_cast(class_data["available seats"], int, -1)
+
+    print(f"Created entries for {len(missing_courses)} missing courses: " + ",".join(missing_courses))
+    print(f"Created entries for {len(missing_classes)} missing classes: " + ",".join(missing_classes))
 
 
-
-def pdf_data():
+def pdf_data(terms):
     print("Getting most up to date pdf")
-
-    target_semester = ["Fall 2022"]#, "Spring 2022", "Summer I 2022", "Summer II 2022"]
 
     response = requests.get("https://registrar.unc.edu/courses/schedule-of-classes/directory-of-classes-2/")
 
     soup = BeautifulSoup(response.content, "html.parser")
 
     for link in soup.select("div > ul > li > a"):
-        if link.text in target_semester:
+        if link.text in terms:
             source = link["href"]
             term = source.split("/")[-1].split("-")[0]
             filename = "ssb-collection/" + term + ".pdf"
@@ -184,6 +207,8 @@ def pdf_data():
 
             if not exists(filename) or not filecmp.cmp(filename, temp_filename):
                 print("File changed, analysing new PDF")
+                print(f"Deleted {db.session.query(Class).filter_by(term=term).delete()} classes from term {term}")
+                print(f"Deleted {db.session.query(Schedule).filter_by(term=term).delete()} schedules from term {term}")
                 os.rename(temp_filename, filename)
                 get_data_from_pdf(filename)
             else:
@@ -193,6 +218,8 @@ def pdf_data():
 
 def get_data_from_pdf(file_name):
     print(f"Processing {file_name}")
+
+    missing_courses = []
 
     term = file_name.split("/")[1].split(".")[0]
     raw = parser.from_file(file_name)
@@ -205,7 +232,7 @@ def get_data_from_pdf(file_name):
                 course_id = class_data["dept"] + " " + class_data["catalog_number"]
                 # check to see if the course exists, if not leave a warning
                 if db.session.query(Course.code).filter_by(code=course_id).first() is None:
-                    print(f"The course {course_id} does not already exist!")
+                    missing_courses.append(course_id)
                     db.session.add(Course(
                         code=course_id,
                         title=class_data["title"],
@@ -229,26 +256,22 @@ def get_data_from_pdf(file_name):
                         location=schedule_data["building"] + " " + schedule_data["room"],
                         instructors=instructors,
                         days=schedule_data["days"],
-                        time=schedule_data["time"]
+                        time=schedule_data["time"],
+                        term=term
                     )
                     schedules.append(schedule)
                 db.session.add_all(schedules)
-
-                deleted_rows = db.session.query(Class).filter_by(
-                    class_number=class_data["class_number"], term=term).delete()
-                if deleted_rows > 0:
-                    pass
-                    #print(deleted_rows)
 
                 db.session.add(Class(
                     course_id=course_id,
                     class_section=class_data["section"],
                     class_number=class_data["class_number"],
-                    term=term,
                     title=class_data["title"],
                     component=class_data["component"],
                     topics=class_data["topics"],
+                    term=term,
                     hours=class_data["units"],
+                    # meeting dates, instruction type not provided
                     schedules=schedules,
                     enrollment_cap=class_data["enrollment_cap"],
                     enrollment_total=class_data["enrollment_total"],
@@ -332,9 +355,10 @@ def get_data_from_pdf(file_name):
             class_data["combined_section_id"] = line[len("Combined Section ID:"):].strip()
         elif line.startswith("Class Equivalents"):
             class_data["equivalents"] = line[len("Class Equivalents:"):].strip()
-    #db.session.add_all(add_queue)
+    print(f"Created entries for {len(missing_courses)} missing courses: " + ",".join(missing_courses))
 
 
+# gets data about courses from the catalog
 def get_catalog_data():
     add_queue = []
     for subject in tqdm(subjects, position=0, leave=False, desc="Subjects"):
@@ -344,7 +368,6 @@ def get_catalog_data():
                              .replace("\\xc2\\xa0", " ").encode('utf-8').decode("unicode_escape"), "html.parser")
 
         for course in tqdm(soup.select(".courseblock"), position=1, leave=False, desc=subject):
-            #print(course)
             course_block_title_parts = course.select_one(".courseblocktitle strong").contents[0].split(". ")
             attributes = []
             strong_text = ""
@@ -385,13 +408,17 @@ def get_catalog_data():
 def update_unc_data():
     db.create_all()
 
+    terms = ["2229"]
+    text_terms = ["Fall 2022"]
+
+    print(f"Deleted {db.session.query(Course).delete()} courses")
     get_catalog_data()
+    db.session.commit()
 
-    get_sections_data("2229")
+    pdf_data(text_terms)
+    db.session.commit()
 
-    pdf_data()
-
-    print("committing data")
+    get_sections_data(terms)
     db.session.commit()
 
 
