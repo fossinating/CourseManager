@@ -6,6 +6,7 @@ from flask import render_template, Response, request
 from __init__ import app
 from database import db
 from models import Class
+from utilities import humanize_hour
 
 
 @app.context_processor
@@ -110,9 +111,12 @@ def schedule_maker():
         })
         for timeslot in class_obj.get_timeslots():
             response_data.append({
-                "parent": "#schedule-container",
+                "parent": f"#{timeslot['day']}",
                 "html": render_template("class_slot.html", class_obj=class_obj, timeslot=timeslot)})
     return json.dumps(response_data)
+
+
+app.jinja_env.globals.update(humanize_hour=humanize_hour)
 
 
 if __name__ == '__main__':

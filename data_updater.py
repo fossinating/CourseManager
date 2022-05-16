@@ -177,6 +177,11 @@ def pdf_data():
             temp_filename = "temp/" + term + ".pdf"
             print(f"Downloading {filename} from {source}")
             urllib.request.urlretrieve(source, temp_filename)
+            if not exists("temp/"):
+                os.mkdir("temp")
+            if not exists("ssb-collection/"):
+                os.mkdir("ssb-collection")
+
             if not exists(filename) or not filecmp.cmp(filename, temp_filename):
                 print("File changed, analysing new PDF")
                 os.rename(temp_filename, filename)
@@ -232,7 +237,8 @@ def get_data_from_pdf(file_name):
                 deleted_rows = db.session.query(Class).filter_by(
                     class_number=class_data["class_number"], term=term).delete()
                 if deleted_rows > 0:
-                    print(deleted_rows)
+                    pass
+                    #print(deleted_rows)
 
                 db.session.add(Class(
                     course_id=course_id,
@@ -379,14 +385,11 @@ def get_catalog_data():
 def update_unc_data():
     db.create_all()
 
-    #eget_catalog_data()
-
-    # get_unc_course_data()
-    # db.session.commit()
+    get_catalog_data()
 
     get_sections_data("2229")
 
-    #pdf_data()
+    pdf_data()
 
     print("committing data")
     db.session.commit()

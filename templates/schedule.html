@@ -6,15 +6,22 @@
 {% block content %}
 <div id="main-container">
 <div id="schedule-container">
-{% for hour in range(14) %}
-    <h2 class="hour-indicator" style="grid-row: {{ hour * 12 + 2 }}/{{ hour * 12 + 3 }}">{{ hour + 8 }}</h2>
-{% endfor %}
 <h2 class="day-indicator" style="grid-column: 2/3">Monday</h2>
 <h2 class="day-indicator" style="grid-column: 3/4">Tuesday</h2>
 <h2 class="day-indicator" style="grid-column: 4/5">Wednesday</h2>
 <h2 class="day-indicator" style="grid-column: 5/6">Thursday</h2>
 <h2 class="day-indicator" style="grid-column: 6/7">Friday</h2>
-<!-- Filled by requests-->
+<div id="schedule-subcontainer">
+{% for hour in range(14) %}
+    <h2 class="hour-indicator" style="grid-row: {{ hour * 12 + 1 }}/{{ hour * 12 + 2 }}">{{ humanize_hour(hour + 8) }}</h2>
+{% endfor %}
+<!-- The following divs are filled by requests-->
+<div id="monday" class="day-schedule"></div>
+<div id="tuesday" class="day-schedule"></div>
+<div id="wednesday" class="day-schedule"></div>
+<div id="thursday" class="day-schedule"></div>
+<div id="friday" class="day-schedule"></div>
+</div>
 </div>
 <div id="class-descriptions">
 <div class="close-description-button button" onclick="close_class_details()">x</div>

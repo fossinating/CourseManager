@@ -47,10 +47,11 @@ class Class(db.Model):
 
         for schedule in self.schedules:
             scheduled_days = []
+            readable_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
             days = ["M", "Tu", "W", "Th", "F"]
             for i in range(len(days)):
                 if days[i] in schedule.days:
-                    scheduled_days.append(i + 2)
+                    scheduled_days.append(readable_days[i])
             times = schedule.time.split("-")
             start_time = 140
             end_time = 146

@@ -20,6 +20,9 @@ def human_time(mil_time):
     return " - ".join(human_times)
 
 
+def humanize_hour(hour):
+    return f"{(hour-1)%12+1}{'pm' if hour >= 12 else 'am'}"
+
 # def format_description(description):
 
 
