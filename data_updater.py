@@ -198,17 +198,21 @@ def pdf_data(terms):
             term = source.split("/")[-1].split("-")[0]
             filename = "ssb-collection/" + term + ".pdf"
             temp_filename = "temp/" + term + ".pdf"
-            print(f"Downloading {filename} from {source}")
-            urllib.request.urlretrieve(source, temp_filename)
             if not exists("temp/"):
                 os.mkdir("temp")
             if not exists("ssb-collection/"):
                 os.mkdir("ssb-collection")
+            if exists(temp_filename):
+                os.remove(temp_filename)
+            print(f"Downloading {filename} from {source}")
+            urllib.request.urlretrieve(source, temp_filename)
 
             if not exists(filename) or not filecmp.cmp(filename, temp_filename):
                 print("File changed, analysing new PDF")
                 print(f"Deleted {db.session.query(Class).filter_by(term=term).delete()} classes from term {term}")
                 print(f"Deleted {db.session.query(Schedule).filter_by(term=term).delete()} schedules from term {term}")
+                if exists(filename):
+                    os.remove(filename)
                 os.rename(temp_filename, filename)
                 get_data_from_pdf(filename)
             else:
@@ -324,10 +328,19 @@ def get_data_from_pdf(file_name):
                 data_stage.pop(0)
             continue
         elif line.startswith("Bldg:"):
+            def find_nth(haystack, needle, n):
+                start = haystack.find(needle)
+                while start >= 0 and n > 1:
+                    start = haystack.find(needle, start + len(needle))
+                    n -= 1
+                return start
+
             schedule = {"building": line[len("Bldg: "):line.index("Room: ")],
                         "room": line[line.index("Room:") + len("Room:"):line.index("Days:")].strip(),
                         "days": line[line.index("Days:") + len("Days:"):line.index("Time:")].strip(),
-                        "time": line[line.index("Time:") + len("Time:"):].strip()}
+                        "time": line[line.index("Time:") + len("Time:"):
+                                     find_nth(line[line.index("Time:") + len("Time:"):].strip(), ":", 2)
+                                     + line.index("Time:")+len("Time: ")+4].strip()}
             if "schedules" not in class_data:
                 class_data["schedules"] = []
             class_data["schedules"].append(schedule)
