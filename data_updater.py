@@ -412,6 +412,7 @@ def update_unc_data():
     text_terms = ["Fall 2022"]
 
     print(f"Deleted {db.session.query(Course).delete()} courses")
+    print(f"Deleted {db.session.query(CourseAttribute).delete()} course attributes")
     get_catalog_data()
     db.session.commit()
 

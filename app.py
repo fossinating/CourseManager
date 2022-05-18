@@ -12,7 +12,7 @@ from utilities import humanize_hour
 @app.context_processor
 def utility_processor():
     from utilities import generate_color, human_time
-    return dict(generate_color=generate_color,human_time=human_time)
+    return dict(generate_color=generate_color, human_time=human_time)
 
 
 class Schedule:
@@ -96,7 +96,6 @@ def class_search():
     return render_template("search-results.html", classes=q.order_by(Class.course_id, Class.class_section).all())
 
 
-# TODO: handle colliding classes better
 @app.route('/api/schedule', methods=["POST", "OPTIONS"])
 def schedule_maker():
     response_data = []
