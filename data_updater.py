@@ -11,6 +11,7 @@ from os.path import exists
 import filecmp
 
 from models import Course, Class, db, Schedule, Instructor, CourseAttribute
+from utilities import search_to_schedule, get_or_create_instructor, safe_cast
 
 
 def get_root_text(html_element):
@@ -20,13 +21,6 @@ def get_root_text(html_element):
         return ""
     else:
         return get_root_text(html_element.contents[0])
-
-
-def safe_cast(val, to_type, default=None):
-    try:
-        return to_type(val)
-    except (ValueError, TypeError):
-        return default
 
 
 subjects = (
@@ -157,11 +151,8 @@ def get_sections_data_for_term(term):
         if class_obj is None:
             missing_classes.append(str(class_number))
 
-            db.session.add(Schedule(
-                location=class_data["room"],
-                class_id=class_number,
-                term=term
-            ))
+            schedule = search_to_schedule(class_data, term)
+            db.session.add(schedule)
 
             db.session.add(Class(
                 course_id=course_id,
@@ -172,11 +163,31 @@ def get_sections_data_for_term(term):
                 hours=safe_cast(class_data["credit hours"], float, -1.0),
                 meeting_dates=class_data["meeting dates"],
                 instruction_type=class_data["instruction mode"],
+                schedules=[schedule],
                 enrollment_total=-1 * safe_cast(class_data["available seats"], int, -1)
             ))
         else:
+            # add/updater the meeting dates since this isnt available in the pdf
             class_obj.meeting_dates = class_data["meeting dates"]
+            # add/update the instruction type since this isn't scraped from the pdf
             class_obj.instruction_type = class_data["instruction mode"]
+            generated_schedule = search_to_schedule(class_data, term)
+            found_match = False
+            # search through all of the schedules to find a matching one
+            for schedule in class_obj.schedules:
+                if generated_schedule.days == schedule.days and generated_schedule.time == schedule.time:
+                    found_match = True
+                    # if a match is found, check if the instructor is included
+                    if class_data["instructor name"] not in [instructor.name for instructor in schedule.instructors]:
+                        # if instructor not included, add it
+                        schedule.instructors.append(get_or_create_instructor(class_data["instructor name"]))
+                    break
+
+            # if a matching schedule not found, add the generated one
+            if not found_match:
+                class_obj.schedules.append(generated_schedule)
+
+            # update enrollment total
             class_obj.enrollment_total = \
                 (0 if class_obj.enrollment_cap is None else class_obj.enrollment_cap) \
                 - safe_cast(class_data["available seats"], int, -1)
