@@ -80,10 +80,8 @@ def search():
     return response
 
 
-@app.route('/class_search', methods=["POST"])
-# TODO: reroute to /api/search
+@app.route('/api/search', methods=["POST"])
 # TODO: Search by name, professor, geneds
-# TODO: Make add button more responsive
 # TODO: Fade if class already in schedule
 # TODO: Fade if class conflicts with schedule
 def class_search():
@@ -93,7 +91,8 @@ def class_search():
     if request.form.get("component") != "any":
         q = q.filter(getattr(Class, "component").like("%%%s%%" % request.form.get("component")))
 
-    return render_template("search-results.html", classes=q.order_by(Class.course_id, Class.class_section).all())
+    return render_template("search-result.html",
+                           classes=q.order_by(Class.course_id, Class.class_section).limit(50).all())
 
 
 @app.route('/api/schedule', methods=["POST", "OPTIONS"])

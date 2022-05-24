@@ -16,6 +16,26 @@ function add_class(class_number){
         schedule.classNumbers.push(class_number)
         save_schedule(schedule)
     }
+
+    $(".class-result[class_id='" + class_number + "']").addClass("inSchedule")
+}
+
+
+function updateClasses() {
+    var schedule = get_active_schedule()
+    $(".class-result").each(function(index){
+        if (schedule.classNumbers.includes($(this).attr("class_id"))){
+            $(this).addClass("inSchedule")
+        } else {
+            $(this).removeClass("inSchedule")
+        }
+    })
+}
+
+
+function toggleMode(){
+    $("#results-container").toggleClass("tiled")
+    $("#results-container").toggleClass("rows")
 }
 
 
@@ -37,6 +57,7 @@ $("#search-form").submit(function(e) {
             if (loaded_id < _request) {
                 loaded_id = _request;
                 $("#results-container").html(data);
+                updateClasses();
             }
         }
     });

@@ -1,0 +1,22 @@
+{% for class in classes %}
+<div class="class-result" class_id="{{ class.class_number }}" style="background-color: hsla({{ generate_color(class.course_id) }})">
+    <div class="class-info">
+        <h1>{{ class.course_id + " - "  + class.class_section }}</h1>
+        <h2>{{ class.title }}</h2>
+        <h3>{{ class.hours }} hours</h3>
+    </div>
+    {% for schedule in class.schedules %}
+        <div class="schedule">
+            <h2>{{ schedule.days }}</h2>
+            <h2>{{ human_time(schedule.time) }}</h2>
+            {% if schedule.instructors|length >= 0 %}
+                <h3>{{ schedule.instructors[0].name }}</h3>
+            {% else %}
+                <h3>TBA</h3>
+            {% endif %}
+            <h3>{{ schedule.location }}</h3>
+        </div>
+    {% endfor %}
+    <div class="add_class_button" onclick="add_class('{{ class.class_number }}')">+</div>
+</div>
+{% endfor %}

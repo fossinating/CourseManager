@@ -1,7 +1,18 @@
+:root {
+    --background-color: white;
+    --text-color: black;
+    --primary-color: #8a8a8a;
+    --secondary-color: #bbb;
+    --tertiary-color: #ccc;
+    --negative-color: #df5858;
+    --positive-color: #7aff7a;
+}
+
 html {
     height: 100%;
     width: 100%;
     margin: 0;
+    font-family: Arial, sans-serif;
 }
 
 body {
@@ -18,20 +29,20 @@ body {
     grid-column: 1/2;
     display: flex;
     flex-direction: row;
-    background-color: darkgrey;
+    background-color: var(--secondary-color);
 }
 
 .nav_item {
-    font-size: 2rem;
+    font-size: 1.5rem;
 
     display: flex;
     justify-items: center;
     align-items: center;
     padding: 1rem;
-    background-color: grey;
+    background-color: var(--primary-color);
     border-radius: 10px;
     margin: 0.25rem;
     text-decoration: none;
-    color: black;
+    color: var(--text-color);
     text-transform: uppercase;
 }

@@ -3,7 +3,9 @@
 }
 
 #main-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 30% 70%;
+
     overflow: hidden;
 
     overflow-x: auto;
@@ -13,10 +15,15 @@
     height: 100%;
     width: 100%;
 
-    overflow: hidden;
+    overflow: auto;
+}
+
+#schedule {
+    min-width: 60rem;
 
     display: grid;
-    grid-template: 2rem 1fr / 3rem repeat(5, 1fr);
+    /* 14 hours, times 12 slots per hour */
+    grid-template: auto repeat(168, 1fr) / auto repeat(5, 1fr);
 }
 
 #schedule-subcontainer {
@@ -32,31 +39,54 @@
     grid-template-columns: auto repeat(5, 1fr);
 }
 
+.hour-indicator, .day-indicator {
+    margin: 0 0 0 0;
+    padding: 0;
+}
+
 .hour-indicator {
     height: 0;
-    margin: 0 0 0 3px;
-    padding-right: 1px;
+    position: -webkit-sticky;
+    position: sticky;
+    left: 5px;
+    grid-column: 1/2;
+    z-index: 9;
+    padding-right: 10px;
+    font-size: 1em;
+}
+
+.hour-background {
+    grid-column: 1/2;
+    grid-row: 2/169;
+    position: sticky;
+    position: -webkit-sticky;
+    left: 0;
+    background-color: var(--background-color);
+    z-index: 8;
 }
 
 .day-indicator {
     text-align: center;
-    padding-top: 0;
-    margin-top: 0;
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    background-color: var(--background-color);
+    z-index: 10;
 }
 
 .day-schedule{
     display: grid;
     grid-template-rows: repeat(168, 1fr);
-    grid-row: 1/168;
+    grid-row: 2/169;
     height: 100%;
 }
 
 .day-schedule:nth-child(odd) {
-    background-color: grey;
+    background-color: var(--secondary-color);
 }
 
 .day-schedule:nth-child(even) {
-    background-color: darkgrey;
+    background-color: var(--tertiary-color);
 }
 
 .visible {
@@ -73,47 +103,53 @@
     margin: 5px;
 }
 
-.class_slot:hover {
+.class_slot:hover, .class_slot:focus {
     cursor: pointer;
-    box-shadow: 0 0 0 2px grey;
+    box-shadow: 0 0 2px 3px var(--primary-color);
 }
 
 .class_slot h1 {
-    font-size: 1.3rem;
-    line-height: 1.3rem;
+    font-size: 1.1rem;
+    line-height: 1.1rem;
     margin: 0.1rem;
 }
 
 .class_slot h2 {
-    font-size: 1.1rem;
-    line-height: 1.1rem;
+    font-size: 1rem;
+    line-height: 1rem;
     margin: 0.1rem;
     font-weight: normal;
 }
 
 #class-descriptions {
     display: flex;
-    width: 0;
     visibility: collapse;
-    transition: width 0.3s linear;
+    transition: left 0.5s ease-in-out;
+    left: -100%;
+    position: relative;
     flex-shrink: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--secondary-color);
 }
 
 #class-descriptions.visible {
-    width: 30%;
+    left: 0;
 }
 
 .class-description {
     visibility: collapse;
-    width: 30vw;
+    width: 100%;
     height: 100%;
-    background-color: grey;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     padding: 1rem;
+    overflow-y: auto;
+    background-color: var(--secondary-color);
 }
 
 .button:hover {
@@ -121,11 +157,12 @@
 }
 
 .remove-class-button {
-    background-color: darkred;
+    background-color: var(--negative-color);
     font-size: 2rem;
     padding: 0.8rem;
     border-radius: 15px;
     text-transform: capitalize;
+    border: 3px solid var(--primary-color)
 }
 
 .class-description h2 {
@@ -163,6 +200,41 @@
     font-weight: bold;
 }
 
-@media only screen and (max-width: 600px) {
-    
+#menu-container {
+    display: grid;
+    height: 100%;
+    background-color: var(--secondary-color);
+    overflow: hidden;
+}
+
+#menu-items {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#menu-container > * {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+@media screen and (max-width: 600px) {
+    #main-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 70% 30%;
+    }
+
+    #menu-container {
+        grid-row: 2/3;
+    }
+
+    #class-descriptions {
+        transition: bottom 0.5s ease-in-out;
+        bottom: -100%;
+    }
+
+    #class-descriptions.visible {
+        bottom: 0;
+    }
 }
